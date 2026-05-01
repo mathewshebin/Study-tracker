@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Study Tracker">
+<title>Study Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:#f2f2f7;min-height:100vh;padding:0 0 60px}
+
+/* TOP BAR */
+.top-bar{background:linear-gradient(135deg,#1D9E75,#15755a);padding:52px 20px 18px}
+.top-bar h1{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.3px}
+.top-bar .sub{font-size:12px;color:rgba(255,255,255,0.75);margin-top:3px}
+.streak-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.date-lbl{font-size:13px;color:rgba(255,255,255,0.9);font-weight:500}
+.streak-badge{background:rgba(255,255,255,0.22);border-radius:99px;padding:5px 13px;font-size:13px;font-weight:600;color:#fff}
+
+/* PROGRESS */
+.progress-wrap{background:#fff;padding:14px 20px 16px;border-bottom:0.5px solid #e5e5e5}
+.prog-label{display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:8px}
+.prog-label span:last-child{font-weight:600;color:#1D9E75}
+.prog-bg{background:#e5e5ea;border-radius:99px;height:8px;overflow:hidden}
+.prog-fill{height:8px;border-radius:99px;background:linear-gradient(90deg,#1D9E75,#26c98f);transition:width 0.4s ease}
+
+/* DAY TABS */
+.day-scroll{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;background:#fff;border-bottom:0.5px solid #e5e5e5;-webkit-overflow-scrolling:touch}
+.day-scroll::-webkit-scrollbar{display:none}
+.day-btn{flex-shrink:0;padding:6px 15px;border-radius:99px;border:1.5px solid #e0e0e0;background:#fff;font-size:13px;color:#555;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
+.day-btn.active{background:#1D9E75;color:#fff;border-color:#1D9E75;font-weight:700}
+
+/* SECTION LABELS */
+.section-lbl{font-size:11px;font-weight:700;color:#8e8e93;letter-spacing:0.08em;text-transform:uppercase;padding:18px 20px 7px;background:#f2f2f7}
+
+/* SESSION ROWS */
+.session{display:flex;align-items:center;gap:12px;background:#fff;padding:14px 20px;border-bottom:0.5px solid #f2f2f2;cursor:pointer;transition:background 0.12s}
+.session:last-of-type{border-bottom:none}
+.session:active{background:#f6f6f6}
+.session.done .s-name{text-decoration:line-through;color:#b5b5b5}
+.session.done .s-time{color:#c5c5c5}
+.session.done .s-note{color:#ccc}
+.cb{width:24px;height:24px;border-radius:50%;border:2px solid #d1d1d6;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.cb.checked{background:#1D9E75;border-color:#1D9E75}
+.cb.checked::after{content:'';display:block;width:6px;height:10px;border:2.5px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
+.s-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+.s-info{flex:1}
+.s-name{font-size:15px;color:#1c1c1e;font-weight:400;line-height:1.3}
+.s-time{font-size:12px;color:#8e8e93;margin-top:3px}
+.s-note{font-size:11px;color:#1D9E75;margin-top:2px;font-style:italic}
+
+/* FOOD CARD */
+.food-card{margin:0 20px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+.food-header{background:linear-gradient(135deg,#ff9500,#ff6f00);padding:12px 16px;display:flex;align-items:center;gap:8px}
+.food-header span{font-size:15px;font-weight:700;color:#fff}
+.food-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:0.5px solid #f5f5f5;cursor:pointer;transition:background 0.12s}
+.food-row:last-child{border-bottom:none}
+.food-row:active{background:#fffbf5}
+.food-row.done .f-name{text-decoration:line-through;color:#bbb}
+.food-cb{width:22px;height:22px;border-radius:50%;border:2px solid #ffcc80;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s}
+.food-cb.checked{background:#ff9500;border-color:#ff9500}
+.food-cb.checked::after{content:'';display:block;width:5px;height:9px;border:2.5px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
+.f-icon{font-size:18px;flex-shrink:0}
+.f-info{flex:1}
+.f-name{font-size:14px;color:#1c1c1e}
+.f-time{font-size:12px;color:#8e8e93;margin-top:2px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 20px 0}
+.stat{background:#fff;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.stat-num{font-size:28px;font-weight:700;color:#1c1c1e}
+.stat-lbl{font-size:11px;color:#8e8e93;margin-top:3px}
+
+/* RULES */
+.rules-box{margin:14px 20px 0;background:#fff;border-radius:14px;padding:14px 16px;border-left:4px solid #1D9E75;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.rules-title{font-size:12px;font-weight:700;color:#1D9E75;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em}
+.rule{font-size:13px;color:#333;padding:4px 0;display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.rule-dot{color:#1D9E75;font-weight:700;flex-shrink:0}
+
+/* TRAVEL */
+.travel-box{margin:14px 20px 0;background:#fff;border-radius:14px;padding:14px 16px;border-left:4px solid #007aff;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.travel-title{font-size:12px;font-weight:700;color:#007aff;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em}
+.travel-row{font-size:13px;color:#333;padding:3px 0;display:flex;gap:8px;align-items:flex-start}
+
+/* BUTTONS */
+.reset-btn{display:block;width:calc(100% - 40px);margin:16px 20px 0;padding:14px;border-radius:14px;border:1px solid #e5e5e5;background:#fff;color:#ff3b30;font-size:15px;font-family:inherit;cursor:pointer;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.reset-btn:active{background:#fff5f5}
+.tip{font-size:12px;color:#8e8e93;text-align:center;padding:16px 20px 0;line-height:1.7}
+.tip strong{color:#1D9E75}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>📚 Study Tracker</h1>
+  <div class="sub">April – June | Goal: Clear Maximum Exams</div>
+  <div class="streak-row">
+    <div class="date-lbl" id="date-lbl"></div>
+    <div class="streak-badge">🔥 <span id="streak-num">0</span> day streak</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="prog-label">
+    <span>Today's Progress</span>
+    <span id="pct-lbl">0%</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div class="day-scroll" id="day-scroll"></div>
+
+<div id="main-content"></div>
+
+<!-- FOOD PLAN -->
+<div class="section-lbl">🍽️ Food Plan</div>
+<div class="food-card" id="food-card"></div>
+
+<!-- STATS -->
+<div class="stats-grid">
+  <div class="stat"><div class="stat-num" id="done-n">0</div><div class="stat-lbl">Done</div></div>
+  <div class="stat"><div class="stat-num" id="left-n">0</div><div class="stat-lbl">Left</div></div>
+  <div class="stat"><div class="stat-num" id="pct-n">0%</div><div class="stat-lbl">Complete</div></div>
+</div>
+
+<!-- RULES -->
+<div class="rules-box">
+  <div class="rules-title">⚡ Important Rules</div>
+  <div class="rule"><span class="rule-dot">•</span> No phone during study sessions</div>
+  <div class="rule"><span class="rule-dot">•</span> Use 50 min focus blocks</div>
+  <div class="rule"><span class="rule-dot">•</span> Solve problems every single day</div>
+  <div class="rule"><span class="rule-dot">•</span> Avoid distractions and friends during exam period</div>
+  <div class="rule"><span class="rule-dot">•</span> Consistency is more important than intensity</div>
+</div>
+
+<!-- TRAVEL -->
+<div class="travel-box">
+  <div class="travel-title">✈️ Travel Strategy</div>
+  <div class="travel-row"><span>🏠</span> Stay in Bangalore for study</div>
+  <div class="travel-row"><span>🚌</span> Travel to Coimbatore 1 day before exam</div>
+  <div class="travel-row"><span>🔙</span> Return immediately after exam</div>
+</div>
+
+<button class="reset-btn" id="reset-btn">🔄 Reset Today's Progress</button>
+<div class="tip"><strong>Consider it Done!</strong> 💪<br>Tap each item when complete.<br>Add to Home Screen for quick access.</div>
+
+<script>
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+const MON_SAT = [
+  {icon:'⏰', name:'Wake up – No phone, drink water', time:'6:30 AM'},
+  {icon:'🏃', name:'Exercise + Sunlight', time:'6:35 – 7:00 AM', note:'Improves focus & Vitamin D'},
+  {icon:'🍳', name:'Breakfast – Eggs for energy', time:'7:00 – 7:20 AM'},
+  {icon:'📐', name:'Deep Study 1 – Math (Problem Solving)', time:'7:30 – 9:30 AM'},
+  {icon:'📡', name:'Deep Study 2 – Signals / Circuits', time:'10:00 – 12:00 PM'},
+  {icon:'⚡', name:'Study 3 – EDC / EMF / Random', time:'1:00 – 3:00 PM'},
+  {icon:'✏️', name:'Problem Solving Session', time:'3:30 – 5:30 PM'},
+  {icon:'💡', name:'Light Study – HVE / VLSI', time:'6:00 – 7:30 PM'},
+  {icon:'🔁', name:'Revision + PYQs', time:'8:30 – 10:00 PM'},
+  {icon:'😴', name:'Sleep', time:'10:30 PM'},
+];
+
+const SUNDAY = [
+  {icon:'⏰', name:'Wake up', time:'5:15 AM'},
+  {icon:'🧠', name:'High Focus Study – Math / Signals', time:'5:30 – 6:45 AM'},
+  {icon:'🛵', name:'Job', time:'7:00 – 3:00 PM'},
+  {icon:'💡', name:'Light Study', time:'5:00 – 6:30 PM'},
+  {icon:'🔁', name:'Revision', time:'7:00 – 8:00 PM'},
+];
+
+const FOOD = [
+  {icon:'🥚', name:'Morning – Eggs', time:'7:00 – 7:20 AM'},
+  {icon:'☀️', name:'Daily Sunlight', time:'Morning', note:'Essential every day'},
+  {icon:'🍱', name:'Lunch – PG Meals', time:'Around 12:30 – 1:00 PM'},
+  {icon:'🍌', name:'Evening – Banana', time:'Around 5:30 PM'},
+  {icon:'🥛', name:'Milk (3–4 times/week)', time:'Evening / Night'},
+  {icon:'🍱', name:'Dinner – PG Meals', time:'Around 8:00 PM'},
+];
+
+const today = new Date();
+const todayDay = today.getDay();
+let viewDay = todayDay;
+
+function dateForDay(d){
+  const dt = new Date(today);
+  dt.setDate(dt.getDate()+(d-todayDay));
+  return dt;
+}
+function storageKey(d){ return 'study_'+dateForDay(d).toISOString().slice(0,10); }
+function foodKey(d){ return 'food_'+dateForDay(d).toISOString().slice(0,10); }
+function loadChecked(d){ try{ return JSON.parse(localStorage.getItem(storageKey(d)))||[]; }catch(e){ return []; } }
+function saveChecked(d,arr){ localStorage.setItem(storageKey(d),JSON.stringify(arr)); }
+function loadFood(d){ try{ return JSON.parse(localStorage.getItem(foodKey(d)))||[]; }catch(e){ return []; } }
+function saveFood(d,arr){ localStorage.setItem(foodKey(d),JSON.stringify(arr)); }
+function getSessions(d){ return d===0?SUNDAY:MON_SAT; }
+
+function getStreak(){
+  let s=0, d=new Date(today);
+  for(let i=0;i<90;i++){
+    const k='study_'+d.toISOString().slice(0,10);
+    let arr; try{ arr=JSON.parse(localStorage.getItem(k))||[]; }catch(e){ arr=[]; }
+    const day=d.getDay(), sessions=getSessions(day);
+    if(arr.length===sessions.length && sessions.length>0){ s++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return s;
+}
+
+function render(){
+  const sessions=getSessions(viewDay);
+  const checked=loadChecked(viewDay);
+  const foodChecked=loadFood(viewDay);
+
+  document.getElementById('date-lbl').textContent=dateForDay(viewDay).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('streak-num').textContent=getStreak();
+
+  // Day tabs
+  const dayScroll=document.getElementById('day-scroll');
+  dayScroll.innerHTML='';
+  DAYS.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='day-btn'+(i===viewDay?' active':'');
+    b.textContent=d;
+    b.onclick=()=>{ viewDay=i; render(); };
+    dayScroll.appendChild(b);
+  });
+
+  // Sessions
+  const main=document.getElementById('main-content');
+  main.innerHTML='';
+  const lbl=document.createElement('div');
+  lbl.className='section-lbl';
+  lbl.textContent=viewDay===0?'📅 Sunday – Job Day Schedule':'📅 Mon – Sat Daily Schedule';
+  main.appendChild(lbl);
+
+  const card=document.createElement('div');
+  card.style.cssText='background:#fff;margin:0;border-bottom:0.5px solid #e5e5e5';
+  sessions.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='session'+(checked.includes(i)?' done':'');
+    const cb=document.createElement('div');
+    cb.className='cb'+(checked.includes(i)?' checked':'');
+    const icon=document.createElement('div');
+    icon.className='s-icon';
+    icon.textContent=s.icon;
+    const info=document.createElement('div');
+    info.className='s-info';
+    info.innerHTML='<div class="s-name">'+s.name+'</div><div class="s-time">'+s.time+'</div>'+(s.note?'<div class="s-note">'+s.note+'</div>':'');
+    div.appendChild(cb); div.appendChild(icon); div.appendChild(info);
+    div.onclick=()=>{
+      const c=loadChecked(viewDay);
+      if(c.includes(i)) c.splice(c.indexOf(i),1); else c.push(i);
+      saveChecked(viewDay,c); render();
+    };
+    card.appendChild(div);
+  });
+  main.appendChild(card);
+
+  // Food
+  const fc=document.getElementById('food-card');
+  fc.innerHTML='<div class="food-header"><span>🍽️ Today\'s Food Plan</span></div>';
+  FOOD.forEach((f,i)=>{
+    const row=document.createElement('div');
+    row.className='food-row'+(foodChecked.includes(i)?' done':'');
+    const cb=document.createElement('div');
+    cb.className='food-cb'+(foodChecked.includes(i)?' checked':'');
+    const icon=document.createElement('div');
+    icon.className='f-icon';
+    icon.textContent=f.icon;
+    const info=document.createElement('div');
+    info.className='f-info';
+    info.innerHTML='<div class="f-name">'+f.name+'</div><div class="f-time">'+f.time+'</div>'+(f.note?'<div class="s-note" style="font-size:11px;color:#ff9500;margin-top:2px;font-style:italic">'+f.note+'</div>':'');
+    row.appendChild(cb); row.appendChild(icon); row.appendChild(info);
+    row.onclick=()=>{
+      const c=loadFood(viewDay);
+      if(c.includes(i)) c.splice(c.indexOf(i),1); else c.push(i);
+      saveFood(viewDay,c); render();
+    };
+    fc.appendChild(row);
+  });
+
+  // Stats (study only)
+  const done=checked.length, total=sessions.length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('pct-lbl').textContent=pct+'%';
+  document.getElementById('done-n').textContent=done;
+  document.getElementById('left-n').textContent=total-done;
+  document.getElementById('pct-n').textContent=pct+'%';
+}
+
+document.getElementById('reset-btn').onclick=()=>{
+  if(confirm('Reset today\'s study + food progress?')){
+    saveChecked(viewDay,[]); saveFood(viewDay,[]); render();
+  }
+};
+
+render();
+</script>
+</body>
+</html>
